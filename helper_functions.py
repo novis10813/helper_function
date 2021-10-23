@@ -297,42 +297,25 @@ def view_random_image(target_dir, target_class):
 
   return img
 
+from tensorflow.keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
+from sklearn.model_selection import cross_val_score
 
-from sklearn.model_selection import KFold
-  def tensorflow_cross_val_score(X, y, model, epoch, callbacks, n_splits=5, random_state=42, verbose=0, steps=0.15):
-    """
-    This function will takes feature, labels, and number of classes and return mean validation scores.
-    *Parameters*
-    X: feature data
-    y: label data
-    model: model that you want to train
-    epoch: epochs of the model
-    callbacks: list of callbacks
-    n_splits: how many dataset are going to split and validate
-    random_state: random state for the Kfold
-    verbose: verbose of the model
-    steps: percentage view of the model
-    """
+def tensorflow_cross_val_score(model, epoch, X_train, y_train, cv, scoring, regressor=True):
+  """
+  Caculate model scoring with sklearn cross_val_score
+  Args:
+    model: The model you want to evaluate
+    epoch: How many epochs do you want to run
+    X_train, y_train: training data
+    cv: the number of training datasets
+    scoring: Loss function of the model
+    regressor: Default: True, use False to switch between Classifier
+  """
+  # Setup switch for the classifier and regressor
+  if regressor == True:
+    model = KerasRegressor(build_fn=model, epochs=epoch, verbose=0)
+  else:
+    model = KerasClassifier(build_fn=model, epochs=epoch, verbose=0)
 
-    scores = []
-    fin_score = []
-    kfold = KFold(n_splits=n_splits, random_state=random_state)
-    for train_index, test_index in kfold.split(X, y):
-      X_train, X_test = X[train_index], X[test_index]
-      y_train, y_test = y[train_index], y[test_index]
-
-      model.fit(X_train, y_train,
-                epochs=epoch,
-                validation_data=(X_test, y_test),
-                validation_steps=int(steps * len(X_test)),
-                steps_per_epoch=int(steps * len(X_train)),
-                callbacks=callbacks,
-                verbose=verbose)
-
-      score = model.evaluate(X_test, y_test)
-      scores.append(score)
-    
-    for i in scores:
-      fin_score.append(i[1])
-
-    return np.mean(fin_score)
+  # return cross val score
+  return cross_val_score(model, X_train, y_train, cv=cv, scoring=scoring)
