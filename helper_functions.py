@@ -300,13 +300,13 @@ def view_random_image(target_dir, target_class):
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
 from sklearn.model_selection import cross_val_score
 
-def tensorflow_cross_val_score(model, epoch, X_train, y_train, cv, scoring, regressor=True):
+def tf_cross_val_score(model, epoch, X, y, cv, scoring, regressor=True):
   """
   Caculate model scoring with sklearn cross_val_score
   Args:
     model: The model you want to evaluate
     epoch: How many epochs do you want to run
-    X_train, y_train: training data
+    X, y: training data
     cv: the number of training datasets
     scoring: Loss function of the model
     regressor: Default: True, use False to switch between Classifier
@@ -318,4 +318,4 @@ def tensorflow_cross_val_score(model, epoch, X_train, y_train, cv, scoring, regr
     model = KerasClassifier(build_fn=model, epochs=epoch, verbose=0)
 
   # return cross val score
-  return cross_val_score(model, X_train, y_train, cv=cv, scoring=scoring)
+  return cross_val_score(model, X, y, cv=cv, scoring=scoring).mean()
