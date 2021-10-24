@@ -297,25 +297,29 @@ def view_random_image(target_dir, target_class):
 
   return img
 
-from tensorflow.keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
+# Cross validate a model
 from sklearn.model_selection import cross_val_score
 
-def tf_cross_val_score(model, epoch, X, y, cv, scoring, regressor=True):
+def tf_cross_val_score(model, epochs, X, y, n_splits, shuffle=True):
   """
   Caculate model scoring with sklearn cross_val_score
   Args:
     model: The model you want to evaluate
     epoch: How many epochs do you want to run
     X, y: training data
-    cv: the number of training datasets
-    scoring: Loss function of the model
-    regressor: Default: True, use False to switch between Classifier
+    n_splits: the number of training datasets
+    shuffle: Shuffle the folding and the training datasets
   """
-  # Setup switch for the classifier and regressor
-  if regressor == True:
-    model = KerasRegressor(build_fn=model, epochs=epoch, verbose=0)
-  else:
-    model = KerasClassifier(build_fn=model, epochs=epoch, verbose=0)
+  # make a split of the dataset for linear datasets
+  kfold = KFold(n_splits=n_splits, shuffle=shuffle)
+  scores = []
 
-  # return cross val score
-  return cross_val_score(model, X, y, cv=cv, scoring=scoring).mean()
+  for train_indices, test_indices in kfold.split(X, y):
+    X_train, X_test = X[train_indices], X[test_indices]
+    y_train, y_test = y[train_indices], y[test_indices]
+
+    model.fit(X_train, y_train, epochs=epochs, shuffle=shuffle, verbose=0)
+    score = model.evaluate(X_test, y_test, verbose=0)
+    scores.append(score[1])
+
+  return np.mean(scores)
