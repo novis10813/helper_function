@@ -300,7 +300,7 @@ def view_random_image(target_dir, target_class):
 # Cross validate a model
 from sklearn.model_selection import cross_val_score
 
-def tf_cross_val_score(model, epochs, X, y, n_splits, shuffle=True):
+def tf_cross_val_score(model=None, epochs=None, X=None, y=None, n_splits=None, shuffle=True):
   """
   Caculate model scoring with sklearn cross_val_score
   Args:
