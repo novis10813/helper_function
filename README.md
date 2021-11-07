@@ -1,2 +1,2 @@
 # helper_function
- some useful function
+These are Pytorch, Tensorflow, and preprocessing useful functions for daily use.
